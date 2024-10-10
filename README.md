@@ -24,3 +24,8 @@ Linux系统，推荐使用WSL安装Ubuntu，且实现完成以下配置
 
 一些其他的功能或许会考虑先写在博客上 丢个链接：[C3ngH's B10g](https://c3ngh.top/)
 
+#### 测试用例
+
+可以使用工具一把梭test文件夹内的题目
+
+![image1](img/image1.png)
