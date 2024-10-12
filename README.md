@@ -10,6 +10,8 @@ Linux系统，推荐使用WSL安装Ubuntu，且实现完成以下配置
 - exiftool
 - zsteg
 - foremost
+- strings
+- F5-steganography
 
 #### 未来会加入的功能
 
