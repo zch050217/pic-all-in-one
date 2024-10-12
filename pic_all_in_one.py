@@ -1,14 +1,17 @@
 import subprocess
-import sys
 import re
 import zlib
 import binascii
 import struct
 import shutil
 import os
+import argparse
 
-image_path = sys.argv[1]
-image_name = image_path.split('/')[-1]
+def parse_args():
+    parser = argparse.ArgumentParser(description="CTF Misc 图片隐写All in One工具")
+    parser.add_argument("image_path", help="输入图片路径")
+    parser.add_argument("-p", "--password", help="可能用于解密的密钥（可选）", required=False)
+    return parser.parse_args()
 
 def run_command(command):
     result = subprocess.run(command, shell=True,
@@ -19,8 +22,7 @@ def run_command(command):
                             )
     return result
 
-def exiftool():
-
+def exiftool(image_path):
     command = f'exiftool {image_path}'
     result = run_command(command)
 
@@ -34,7 +36,7 @@ def exiftool():
     else:
         print("[-]exiftool: 未找到内容")
 
-def zsteg():
+def zsteg(image_path):
 
     text_pattern = r"flag\{.*?\}|flag|666c6167|f1ag|fl4g|Zmxh|&#102;MZWGC|102 108 97 103|1100110|ctf|ctf\{.*?\}|key|464C4147|pass|{|}"
     file_patterns = {
@@ -77,7 +79,7 @@ def zsteg():
                     combined_results.append(f"{channel} : {file_description} -> {output_file}")
                     break
 
-def CRC_Crack():
+def CRC_Crack(image_path, image_name):
     
     with open(image_path, 'rb') as image_data:
         bin_data = image_data.read()
@@ -120,9 +122,9 @@ def CRC_Crack():
                 print(f'[+]CRC宽高爆破: 爆破成功, 文件已保存至 {output_file}')
                 return
 
-    print('[-]CRC宽高爆破: 爆破失败')
+    print('[-]CRC宽高爆破: 非png文件, 爆破失败')
 
-def foremost():
+def foremost(image_path):
     output_dir = './foremost'
     command = f'foremost -i {image_path} -o {output_dir}'
     run_command(command)
@@ -138,7 +140,7 @@ def foremost():
         print("[-]foremost: 未找到内容")
         shutil.rmtree(output_dir)
 
-def strings_check():
+def strings_check(image_path):
 
     pattern = r"flag\{.*?\}|flag|666c6167|f1ag|fl4g|Zmxh|&#102;MZWGC|102 108 97 103|1100110|ctf|ctf\{.*?\}|key|464C4147|pass"
     regex = re.compile(pattern)
@@ -150,18 +152,72 @@ def strings_check():
     match_found = False
 
     for line in output:
+
         if regex.search(line):
             print(f"[+]strings: {line}")
             match_found = True
     if not match_found:
         print("[-]strings: 未找到内容")
-        
+
+def F5_steganography(image_path, password):
+
+    output_dir = './F5-steganography'
+    os.makedirs(output_dir, exist_ok=True)
+    tool_path = os.path.expanduser('~/tools/F5-steganography/')
+
+    if password:
+        command = f'java -cp {tool_path} Extract {image_path} -p {password}'
+    else:
+        command = f'java -cp {tool_path} Extract {image_path}'
+
+    result = run_command(command)
+
+    if result.returncode == 0:
+
+        extracted_file = 'output.txt'
+        if os.path.exists(extracted_file):
+            target_path = os.path.join(output_dir, 'output.txt')
+            shutil.move(extracted_file, target_path)
+            print(f"[+]F5-steganography: 提取成功, 文件已保存至 {target_path}")
+
+    else:
+        print("[-] F5-steganography: 内容未找到")
+
+# def steghide(image_path, password, wordlist_path):
+    
+#         output_dir = './steghide'
+#         os.makedirs(output_dir, exist_ok=True)
+    
+#         if password:
+#             command = f'steghide extract -sf {image_path} -p {password} -xf {output_dir}'
+#             result = run_command(command)
+
+
+
+#         else:
+#             stegseek()
+
+
+# def stegseek():
+#     command = 'stegseek {image_path} /usr/share/wordlists/rockyou.txt'
+#     result = run_command(command)
+#     if result.returncode == 0:
+#         print(f"[+]stegseek: 提取成功, 密码为 {result.stdout}")
+#     else:
+#         print("[-]stegseek: 内容未找到")
+
 def main():
-    exiftool()
-    strings_check()
-    zsteg()
-    CRC_Crack()
-    foremost()
+    args = parse_args()
+    image_path = args.image_path
+    image_name = image_path.split('/')[-1]
+    password = args.password
+
+    exiftool(image_path)
+    strings_check(image_path)
+    zsteg(image_path)
+    CRC_Crack(image_path, image_name)
+    foremost(image_path)
+    F5_steganography(image_path, password)
 
 if __name__ == '__main__':
     main()
