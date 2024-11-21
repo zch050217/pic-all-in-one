@@ -183,28 +183,22 @@ def F5_steganography(image_path, password):
     else:
         print("[-] F5-steganography: 内容未找到")
 
-# def steghide(image_path, password, wordlist_path):
+def stegpy(image_path, password):
     
-#         output_dir = './steghide'
-#         os.makedirs(output_dir, exist_ok=True)
-    
-#         if password:
-#             command = f'steghide extract -sf {image_path} -p {password} -xf {output_dir}'
-#             result = run_command(command)
+    output_dir = './stegpy'
+    os.makedirs(output_dir, exist_ok=True)
+    os.chdir(output_dir)
+    if password:
+        command = f'stegpy {image_path} -p {password}'
+    else:
+        command = f'stegpy {image_path}'
 
+    result = run_command(command)
 
-
-#         else:
-#             stegseek()
-
-
-# def stegseek():
-#     command = 'stegseek {image_path} /usr/share/wordlists/rockyou.txt'
-#     result = run_command(command)
-#     if result.returncode == 0:
-#         print(f"[+]stegseek: 提取成功, 密码为 {result.stdout}")
-#     else:
-#         print("[-]stegseek: 内容未找到")
+    if result.returncode == 0:
+        print(f"[+]stegpy: 提取成功, 文件已保存至 {output_dir}")
+    else:
+        print("[-]stegpy: 内容未找到")
 
 def main():
     args = parse_args()
@@ -218,6 +212,7 @@ def main():
     CRC_Crack(image_path, image_name)
     foremost(image_path)
     F5_steganography(image_path, password)
+    stegpy(image_path, password)
 
 if __name__ == '__main__':
     main()
