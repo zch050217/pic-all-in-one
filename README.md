@@ -12,6 +12,7 @@ Linux系统，推荐使用WSL安装Ubuntu，且实现完成以下配置
 - foremost
 - strings
 - F5-steganography
+- stegpy
 
 #### 未来会加入的功能
 
